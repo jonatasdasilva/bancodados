@@ -42,7 +42,6 @@ def preProcessa ():
     with open('cabecalho', 'r', encoding='utf8') as file:
         dados = file.read()
         file.close()
-        # Leituras das linhas e colunas do arquivo CSV.
     values = dados.split(', ')
     return values
 '''>>>>>>>>>> Fim da função que coleta cabeçalho dos dados <<<<<<<<<'''
@@ -71,7 +70,7 @@ def createVehicle (cab, conteudo):
     vehicle[cab] = conteudo
 def createFactor (cab, conteudo):
     factor[cab] = conteudo
-# Insere o conteúdo do arquivo nos locais devidos
+# Insere o conteúdo do arquivo JSON nos locais devidos
 def createDocument ():
     createCyclist(cabecalho[14], dado[14])
     createCyclist(cabecalho[15], dado[15])
@@ -172,6 +171,19 @@ def realizaUpdate ():
     numeros = valores.split(', ') # atráves dos numeros eu correlaciono com os campos de cabeçalho e sei qual dado realizar update
 
 '''>>>>>>>>>> Fim da função de update de documentos <<<<<<<<<<'''
+'''>>>>>>>>>> Fim da função de colsulta de documentos <<<<<<<<<<'''
+def realiazConsulta ():
+    v = []
+    print("  [ PRECISAMOS DOS DADOS PARA REALIZAR A CONSULTA, VAMOS COMEÇAR ]")
+    par = input("  [ QUANTOS PARAMÊTRO DESEJA REALIZAR CONSULTA? ] =>> ")
+    if par > 1:
+        print("  [ VAMOS REALIZAR AS LEITURAS DOS PARAMÊTROS, SENDO COLETADO UM POR VEZ ]")
+        print("  [ 0-DATE,1-TIME,2-BOROUGH,3-ZIP CODE,4-LATITUDE,5-LONGITUDE,6-LOCATION ]")
+        
+        for i in range(par):
+            
+    print("  [ PRECISAMOS DOS DADOS PARA REALIZAR UPDATE, NÃO ESQUEÇA O '_id' ]")
+'''>>>>>>>>>> Fim da função de consulta de documentos <<<<<<<<<<'''
 '''>>>>>>>>>> Função de remoção de documentos <<<<<<<<<<'''
 def realizaExclusao ():
     valor = input("  [ DESEJA ( 1 - REALIZAR UM BUSCA) OU ( 2 - INFORMAR UM '_id') ] =>> ")
@@ -179,8 +191,8 @@ def realizaExclusao ():
          # Criamodulo exclusivo da exlusão para modularizar.
     elif valor == 2:
         num = input("  [ INFORME O '_id' DO DOCUMENTO A SER EXCLUIDO ] =>> ")
-
 '''>>>>>>>>>> Fim da função de remoção de documentos <<<<<<<<<<'''
+
 '''>>>>>>>>>> MENU PRINCIPAL <<<<<<<<<<'''
 def menu ():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -218,4 +230,3 @@ if __name__ == "__main__":
             break
     print("|===================>>>>> ATÉ MAIS TENHA UM BOM DIA <<<<<===================|")
     cliente.close()
-    
