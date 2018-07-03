@@ -217,9 +217,6 @@ if __name__ == "__main__":
     #conteudo = []
     #list = collisions.find() #coleta todos os documentos da coleção 
     #num = collisions.find().count()
-    #for documento in list:
-    #    print(documento)
-    #print("Número de arquivos na coleção:",num)
     verificaDatabase()
     while True:
         retorno = menu()
