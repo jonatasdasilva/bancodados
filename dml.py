@@ -7,8 +7,6 @@ import csv
 import json
 import time
 from pymongo import MongoClient
-#from pymongo import Connection
-#from pymongo import ConnectionFailure
 
 ''' DML, Data Manipulation Language, ou Linguagem de Manipulação de Dados. interage
 diretamente com os dados dentro das tabelas. São comandos do DML o INSERT, UPDATE e
@@ -32,8 +30,7 @@ port = 27017
 cliente = MongoClient(host, port)
 print("|=====================>>>>> Script DML no MongoDB <<<<<=====================|")
 print("  [ CONEXÃO MONGODB ESTABELECIDA ] =>> [ SERVIDOR:",host,"PORTA:",port,"]")
-#database = cliente.nypd
-database = cliente.brocou
+database = cliente.nypd
 print("  [ CONEXÃO ESTABELECIDA ] =>> [ DATABASE: NYPD ]")
 collisions = database.collisions
 print("  [ CONEXÃO ESTABELECIDA ] =>> [ COLLECTION: COLLISIONS ]")
@@ -151,7 +148,7 @@ def realizaInsercao ():
 '''>>>>>>>>>> Função que verifica se a coleção detém documentos <<<<<<<<<<'''
 def verificaDatabase ():
     num = collisions.find().count()
-    if (num == 0):
+    if (num == 0):# VERIFICAR INSERÇÃO POR CSV OU JSON
         print("  [ COLLECTION: EMPITY ] => [ ALTERE A COLLECTION OU INSIRA DOCUMENTOS ]")
         resposta = input("  [ DESJA REALIZAR INSERÇÕES? (yes ou no) ] => ")
         if (resposta == "no"):
