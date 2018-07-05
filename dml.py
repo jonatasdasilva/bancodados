@@ -7,6 +7,9 @@ import csv
 import json
 import time
 from pymongo import MongoClient
+from pprint import pprint
+#from pymongo import Connection
+#from pymongo import ConnectionFailure
 
 ''' DML, Data Manipulation Language, ou Linguagem de Manipulação de Dados. interage
 diretamente com os dados dentro das tabelas. São comandos do DML o INSERT, UPDATE e
@@ -24,16 +27,41 @@ vehicle = {}
 cyclist = {}
 motorist = {}
 pedestrians = {}
+
+def cleanData():
+    data.clear()
+
 # Realizando conexão com o MongoDB.
 host = 'localhost'
 port = 27017
 cliente = MongoClient(host, port)
-print("|=====================>>>>> Script DML no MongoDB <<<<<=====================|")
-print("  [ CONEXÃO MONGODB ESTABELECIDA ] =>> [ SERVIDOR:",host,"PORTA:",port,"]")
-database = cliente.nypd
-print("  [ CONEXÃO ESTABELECIDA ] =>> [ DATABASE: NYPD ]")
-collisions = database.collisions
-print("  [ CONEXÃO ESTABELECIDA ] =>> [ COLLECTION: COLLISIONS ]")
+print("|===========================>>>>> Script DML no MongoDB <<<<<=============================|")
+print("  [ CONEXÃO MONGODB ESTABELECIDA ] >> [ SERVIDOR:",host,"PORTA:",port,"]")
+name = input("  [ INFORME O NOME DA DATABASE: ] >> ")
+database = cliente.get_database(name)
+print("  [ CONEXÃO ESTABELECIDA ] >> [ DATABASE:",name," ]")
+colecao = input("  [ INFORME O NOME DA COLLECTION ] >> ")
+if colecao:
+    col = database.collection[colecao]
+    print("  [ CONEXÃO ESTABELECIDA ] >> [ COLLECTION:",colecao,"]")
+else:
+    print("  [ CONEXÃO NÃO ESTABELECIDA, O NOME DA COLLECTION É NECESSÁRIA ]")
+    colecao = input("  [ DIGITE O NOME DA COLLECTION A SER CRIADA OU JÁ EXISTENTE ] >> ")
+    print("  [ O NOME DIGITADO É PARA ( 1 - UMA NOVA COLLECTION ) OU UMA ( 2 - EXSITENTE )? ]")
+    p = int(input("  [ DIGITE O VALOR ] >> "))
+    if colecao == '':
+        print("  [ CONEXÃO NÃO ESTABELECIDA, O NOME DA COLLECTION É NECESSÁRIA ]")
+        print("  [ TENTE NOVAMENTE MAIS TARDE, GOOD BYE! ]")
+        cliente.close()
+        exit()
+    if p == 1:
+        database.create_collection(colecao)
+        print("  [ COLLECTION:",colecao," CRIADA ]")
+        col = database.collection[colecao]
+        print("  [ CONEXÃO ESTABELECIDA ] >> [ COLLECTION:",colecao,"]")
+    if p == 2:
+        col = database.collection[colecao]
+        print("  [ CONEXÃO ESTABELECIDA ] >> [ COLLECTION:",colecao,"]")
 '''>>>>>>>>>> Função que coleta cabeçalho dos dados <<<<<<<<<'''
 def preProcessa ():
     with open('cabecalho', 'r', encoding='utf8') as file:
@@ -46,7 +74,7 @@ def preProcessa ():
 def insertColeta ():
     print("  [ INFORME OS VALORES DOS CAMPOS ABAIXO ]")
     for j, campo in enumerate(cabecalho): 
-        retorno = input("  [",campo,"] =>> ")
+        retorno = input("  [",campo,"] >> ")
         dado.insert(j, retorno)
 '''>>>>>>>>>> Fim da função que realiza coleta dos dados <<<<<<<<<'''
 '''>>>>>>>>>> Função que cria o documentos JSON <<<<<<<<<<'''
@@ -107,48 +135,53 @@ def createDocument ():
     createData("VEHICLES", vehicle)
 '''>>>>>>>>>> Fim da função que cria o documentos JSON <<<<<<<<<<'''
 '''>>>>>>>>>> Função que insere o documento no MongoDB <<<<<<<<<<'''
-def insertMongo (tipo):
-    if tipo == 'U':
-        result = collisions.insert_one(data)
-    elif tipo == 'M':
-        sult = collisions.insert_many(data)
+def insertMongo ():
+    result = col.insert(data)
+    return result
 '''>>>>>>>>>> Fim da função que insere o documentos no MongoDB <<<<<<<<<<'''
 '''>>>>>>>>>> Função de leitura de documento JSON <<<<<<<<<<'''
 def leituraJSON ():
     print("  [ SERÁ LIDO O ARQUIVO JSON 'data.json' CONTIDO NA PASTA ]")
     with open('data.json') as file:
-        data = jason.load(file)
-        print(data)
+        d = json.load(file)
         file.close()
+    return d
 '''>>>>>>>>>> Fim da função de leitura de documento JSON <<<<<<<<<<'''
+'''>>>>>>>>>> Função de leitura de do cabeçalho <<<<<<<<<<'''
+def lerCabecalho ():
+    with open('cabecalho', 'r', encoding='utf8') as file:
+        d= file.readline()
+        valores = d.split(', ')
+        for j, row in enumerate(valores):
+            cabecalho.insert(j, row)
+'''>>>>>>>>>> Fim função de leitura de do cabeçalho <<<<<<<<<<'''
 '''>>>>>>>>>> Função principal de inserção de documentos <<<<<<<<<<'''
 def realizaInsercao ():
     print("  [ DESEJA INSERIR OS DADOS MANUALMENTE OU APARTIR DE ARQUIVO JSON? ]")
     print("  [ COMO ARQUIVO JSON DIGITE 1 ]")
     print("  [ PARA INSERÇÃO MANUAL DIGITE 2 ]")
-    res = input("  [ DIGITE A OPÇÃO DESEJADA ] ==>> ")
+    res = int(input("  [ DIGITE A OPÇÃO DESEJADA ] >> "))
     if res == 1:
-        leituraJSON()
-        print("  [ A INSERÇÃO É PARA UM ÚNICO ARQUIVO OU MULTIPLOS? ]")
-        res = input("  [ DIGITE (U - PARA ÚNICO ARQUIVO) E (M - PARA MULTIPLOS) ] =>> ")
-        insertMongo(res)
-        print("  [ AÇÃO EXECUTADA COM SUCESSO, RETORNANDO AO MENU EM 5 SEGUNDOS! ]")
+        cleanData()
+        data = leituraJSON()
+        insertMongo()
+        print("  [ AÇÃO EXECUTADA COM SUCESSO, RETORNANDO AO MENU EM 3 SEGUNDOS! ]")
     elif res == 2:
         print("  [ CERTIFIQUE-SE DE QUE O ARQUIVO 'cabecalho' ESTAR NA PASTA ]")
-        r = input("  [ QUANTAS DOCUMENTOS DESEJA INSERIR? ] =>> ")
+        r = input("  [ QUANTOS DOCUMENTOS DESEJA INSERIR? ] >> ")
         cabecalho = preProcessa()
         print("  [ PRÉ-PROCESSAMENTO EXECUTADO ]")
         for j in range(r):
             insertColeta()
             createDocument()
-            insertMongo('U')
+            insertMongo()
         print("  [ AÇÃO EXECUTADA COM SUCESSO, RETORNANDO AO MENU EM 5 SEGUNDOS! ]")
-    time.sleep(5)
+    time.sleep(3)
 '''>>>>>>>>>> Fim da função principal de inserção de documentos <<<<<<<<<<'''
 '''>>>>>>>>>> Função que verifica se a coleção detém documentos <<<<<<<<<<'''
 def verificaDatabase ():
-    num = collisions.find().count()
-    if (num == 0):# VERIFICAR INSERÇÃO POR CSV OU JSON
+    num = col.find().count()
+    if (num == 0):
         print("  [ COLLECTION: EMPITY ] => [ ALTERE A COLLECTION OU INSIRA DOCUMENTOS ]")
         resposta = input("  [ DESJA REALIZAR INSERÇÕES? (yes ou no) ] => ")
         if (resposta == "no"):
@@ -159,47 +192,57 @@ def verificaDatabase ():
             realizaInsercao()
     else:
         print("  [ COLLECTION CONTÉM:",num,"DOCUMENTOS ]")
+    time.sleep(5)
 '''>>>>>>>>>> Fim da função de verificação de existência de documentos <<<<<<<<<<'''
 '''>>>>>>>>>> Função para realização de update de documentos <<<<<<<<<<'''
-def realizaUpdate ():
-    valores = []
+def realizaUpdate (): #não ta finalizada
     print("  [ PRECISAMOS DOS DADOS PARA REALIZAR UPDATE, NÃO ESQUEÇA O '_id' ]")
     valores = input("  [ DIGITE OS VALORES DOS CAMPOS, EX.: 0, 4, 23. SEPARE-OS POR ', ' ]")
     numeros = valores.split(', ') # atráves dos numeros eu correlaciono com os campos de cabeçalho e sei qual dado realizar update
 
 '''>>>>>>>>>> Fim da função de update de documentos <<<<<<<<<<'''
 '''>>>>>>>>>> Fim da função de colsulta de documentos <<<<<<<<<<'''
-def realiazConsulta ():
-    v = []
+def realiazConsulta (): #não ta finalizada
     print("  [ PRECISAMOS DOS DADOS PARA REALIZAR A CONSULTA, VAMOS COMEÇAR ]")
-    par = input("  [ QUANTOS PARAMÊTRO DESEJA REALIZAR CONSULTA? ] =>> ")
+    print("  [ DESEJA FAZER UMA CONSULTA DE QUAL TIPO? ]")
+    print("  [ 1 - SIMPLES ]")
+    print("  [ 2 - INER JOIN ]")
+    print("  [ 3 - OUTER JOIN ]")
+    print("  [ ")
+    par = int(input("  [ QUANTAS CONSULTAS DESEJA REALIZAR? ] >> "))
     if par > 1:
-        print("  [ VAMOS REALIZAR AS LEITURAS DOS PARAMÊTROS, SENDO COLETADO UM POR VEZ ]")
-        print("  [ 0-DATE,1-TIME,2-BOROUGH,3-ZIP CODE,4-LATITUDE,5-LONGITUDE,6-LOCATION ]")
-        
         for i in range(par):
+            valor = json.loads(input("  [ DIGITE A CONSULTA DESEJADA ] >> "))
+            retorno = col.find(valor)
+            print("  [ DOCUMENTOS ENCOMTRADOS: ]")
+            pprint(retorno)
+    else:
+        retorno = col.find(valor)
+        print("  [ DOCUMENTOS ENCOMTRADOS: ]")
+        pprint(retorno)        
             
     print("  [ PRECISAMOS DOS DADOS PARA REALIZAR UPDATE, NÃO ESQUEÇA O '_id' ]")
 '''>>>>>>>>>> Fim da função de consulta de documentos <<<<<<<<<<'''
 '''>>>>>>>>>> Função de remoção de documentos <<<<<<<<<<'''
 def realizaExclusao ():
-    valor = input("  [ DESEJA ( 1 - REALIZAR UM BUSCA) OU ( 2 - INFORMAR UM '_id') ] =>> ")
+    valor = int(input("  [ DESEJA ( 1 - REALIZAR UM BUSCA) OU ( 2 - INFORMAR UM '_id') ] >> "))
     if valor == 1: # Para realizar consulta e obter os _ids, salvar em um a lista e depois exluir
-         # Criamodulo exclusivo da exlusão para modularizar.
+         pass # Criamodulo exclusivo da exlusão para modularizar.
     elif valor == 2:
-        num = input("  [ INFORME O '_id' DO DOCUMENTO A SER EXCLUIDO ] =>> ")
+        num = input("  [ INFORME O '_id' DO DOCUMENTO A SER EXCLUIDO ] >> ")
+        col.remove({"_id": num})
 '''>>>>>>>>>> Fim da função de remoção de documentos <<<<<<<<<<'''
 
 '''>>>>>>>>>> MENU PRINCIPAL <<<<<<<<<<'''
 def menu ():
     os.system('cls' if os.name == 'nt' else 'clear')
-    print("|=====================>>>>> Script DML no MongoDB <<<<<=====================|")
+    print("|===========================>>>>> Script DML no MongoDB <<<<<=============================|")
     print("  [ ESCOLHA UMA DAS OPÇÕES ABAIXO ]")
-    print("  [ PARA INSERIR DOCUMENTOS DIGITE =>> 1 ]")
-    print("  [ PARA ATUALIZAR DOCUMENTOS DIGITE =>> 2 ]")
-    print("  [ PARA REALIZAR EXCLUSÃO DE DOCUMENTOS DIGITE =>> 3 ]")
-    print("  [ PARA SAIR DO SCRIPT DIGITE =>> 4 ]")
-    res = input("  [ DIGITE A OPÇÃO DESEJADA ] =>> ")
+    print("  [ PARA INSERIR DOCUMENTOS DIGITE >> 1 ]")
+    print("  [ PARA ATUALIZAR DOCUMENTOS DIGITE >> 2 ]")
+    print("  [ PARA REALIZAR EXCLUSÃO DE DOCUMENTOS DIGITE >> 3 ]")
+    print("  [ PARA SAIR DO SCRIPT DIGITE >> 4 ]")
+    res = int(input("  [ DIGITE A OPÇÃO DESEJADA ] >> "))
     if res == 1:
         realizaInsercao()
     elif res == 2:
@@ -207,20 +250,23 @@ def menu ():
     elif res == 3:
         realizaExclusao()
     elif res == 4:
-        return True
-    return False
+        return False
+    return True
 '''>>>>>>>>>> FIM MENU PRINCIPAL <<<<<<<<<<'''
 
 if __name__ == "__main__":
-    #parameters = input("Insira a ação DDL: ")
-    #cabecalho = []
-    #conteudo = []
-    #list = collisions.find() #coleta todos os documentos da coleção 
-    #num = collisions.find().count()
+    retorno = True
     verificaDatabase()
-    while True:
+    time.sleep(2)
+    while retorno:
+        data.clear()
+        vehicle.clear()
+        person.clear()
+        cyclist.clear()
+        motorist.clear()
+        pedestrians.clear()
+        local.clear()
+        factor.clear()
         retorno = menu()
-        if (retorno):
-            break
-    print("|===================>>>>> ATÉ MAIS TENHA UM BOM DIA <<<<<===================|")
+    print("|=========================>>>>> ATÉ MAIS TENHA UM BOM DIA <<<<<===========================|")
     cliente.close()

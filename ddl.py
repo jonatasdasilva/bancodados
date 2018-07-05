@@ -4,27 +4,25 @@
 apesar do nome não interage com os dados e sim com os objetos do banco.
 São comandos desse tipo o CREATE, o ALTER e o DROP '''
 
-#import os
-#import sys
-#import pandas as pd
-#import numpy as np
+import os
+import sys
 import csv
+import time
 import json
 from pymongo import MongoClient
 
 # Realizando conexão com o MongoDB.
 host = 'localhost'
 port = 27017
-cliente = MongoClient(host, port)
-print("Conexao mongo feita ...")
-database = cliente.nypd
-print("'database' selecionado ...")
-collisions = database.collisions
-print("'collection' selecionada ...")
+cliente = MongoClient('127.0.0.1', port)
+print("|============================>>>>> Script DML no MongoDB <<<<<=============================|")
+print("  [ CONEXÃO MONGODB ESTABELECIDA ] >> [ SERVIDOR:",host,"PORTA:",port,"]")
+name = input("  [ INFORME O NOME DA DATABASE: ] >> ")
+database = cliente.get_database(name)
+print("  [ CONEXÃO ESTABELECIDA ] >> [ DATABASE:",name," ]")
+colecao = input("  [ INFORME O NOME DA COLLECTION ] >> ")
 
-cabecalho = []
-conteudo = []
-'''  -------------- Estrutura e funções de pré-processamento. ---------------- '''
+'''>>>>>>>>>> Estrutura e funções de pré-processamento. <<<<<<<<<'''
 # Variaveis locais para os documentos JSON
 data = {}
 local = {}
@@ -34,82 +32,84 @@ vehicle = {}
 cyclist = {}
 motorist = {}
 pedestrians = {}
-
 #Funções para construção dos documentos JSON
-def createData (cabe, dado):
-    data[cabe] = dado
+def createData (cabecalho, dado):
+    data[cabecalho] = dado
 
-def createLocation (cabe, dado):
-    local[cabe] = dado
+def createLocation (cabecalho, dado):
+    local[cabecalho] = dado
 
-def createPerson (cabe, dado):
-    person[cabe] = dado
+def createPerson (cabecalho, dado):
+    person[cabecalho] = dado
 
-def createCyclist (cabe, dado):
-    cyclist[cabe] = dado
+def createCyclist (cabecalho, dado):
+    cyclist[cabecalho] = dado
 
-def createPedestrians (cabe, dado):
-    pedestrians[cabe] = dado
+def createPedestrians (cabecalho, dado):
+    pedestrians[cabecalho] = dado
 
-def createMotorist (cabe, dado):
-    motorist[cabe] = dado
+def createMotorist (cabecalho, dado):
+    motorist[cabecalho] = dado
 
-def createVehicle (cabe, dado):
-    vehicle[cabe] = dado
+def createVehicle (cabecalho, dado):
+    vehicle[cabecalho] = dado
 
-def createFactor (cabe, dado):
-    factor[cabe] = dado
+def createFactor (cabecalho, dado):
+    factor[cabecalho] = dado
 
 # Insere o conteúdo do arquivo nos locais devidos
-def createDocument ():
-    createCyclist(cabecalho[14], conteudo[14])
-    createCyclist(cabecalho[15], conteudo[15])
-    createMotorist(cabecalho[16], conteudo[16])
-    createMotorist(cabecalho[17], conteudo[17])
-    createPedestrians(cabecalho[12], conteudo[12])
-    createPedestrians(cabecalho[13], conteudo[13])
-    createPerson(cabecalho[10], conteudo[10])
-    createPerson(cabecalho[11], conteudo[11])
+def createDocument (cabecalho, dado):
+    createCyclist(cabecalho[14], dado[14])
+    createCyclist(cabecalho[15], dado[15])
+    createMotorist(cabecalho[16], dado[16])
+    createMotorist(cabecalho[17], dado[17])
+    createPedestrians(cabecalho[12], dado[12])
+    createPedestrians(cabecalho[13], dado[13])
+    createPerson(cabecalho[10], dado[10])
+    createPerson(cabecalho[11], dado[11])
     createPerson("CYCLISTS", cyclist)
     createPerson("MOTORISTS", motorist)
     createPerson("PEDESTRIANS", pedestrians)
-    createFactor(cabecalho[18], conteudo[18])
-    createFactor(cabecalho[19], conteudo[19])
-    createFactor(cabecalho[20], conteudo[20])
-    createFactor(cabecalho[21], conteudo[21])
-    createFactor(cabecalho[22], conteudo[22])
-    createVehicle(cabecalho[24], conteudo[24])
-    createVehicle(cabecalho[25], conteudo[25])
-    createVehicle(cabecalho[26], conteudo[26])
-    createVehicle(cabecalho[27], conteudo[27])
-    createVehicle(cabecalho[28], conteudo[28])
-    createLocation(cabecalho[2], conteudo[2])
-    createLocation(cabecalho[3], conteudo[3])
-    createLocation(cabecalho[4], conteudo[4])
-    createLocation(cabecalho[5], conteudo[5])
-    createLocation(cabecalho[6], conteudo[6])
-    createLocation(cabecalho[7], conteudo[7])
-    createLocation(cabecalho[8], conteudo[8])
-    createLocation(cabecalho[9], conteudo[9])
-    createData("_id", conteudo[23])
-    createData(cabecalho[0], conteudo[0])
-    createData(cabecalho[1], conteudo[1])
+    createFactor(cabecalho[18], dado[18])
+    createFactor(cabecalho[19], dado[19])
+    createFactor(cabecalho[20], dado[20])
+    createFactor(cabecalho[21], dado[21])
+    createFactor(cabecalho[22], dado[22])
+    createVehicle(cabecalho[24], dado[24])
+    createVehicle(cabecalho[25], dado[25])
+    createVehicle(cabecalho[26], dado[26])
+    createVehicle(cabecalho[27], dado[27])
+    createVehicle(cabecalho[28], dado[28])
+    createLocation(cabecalho[2], dado[2])
+    createLocation(cabecalho[3], dado[3])
+    createLocation(cabecalho[4], dado[4])
+    createLocation(cabecalho[5], dado[5])
+    createLocation(cabecalho[6], dado[6])
+    createLocation(cabecalho[7], dado[7])
+    createLocation(cabecalho[8], dado[8])
+    createLocation(cabecalho[9], dado[9])
+    createData("_id", dado[23])
+    createData(cabecalho[0], dado[0])
+    createData(cabecalho[1], dado[1])
     createData("LOCAL", local)
     createData("PERSONS", person)
     createData("FACTORS", factor)
     createData("VEHICLES", vehicle)
-# Grava os dados no documento JSON. Opcional, atualmente desnecessário
+
+# Grava o cabeçalho no arquivo 'cabecalho' externo para novos processamentos
 def writeDocument (cabecalho):
-    #with open('cabecalho.json', 'w') as file:
-    #    json.dump(data, file)
-    with open('cabecalho.txt', 'w', encoding='utf-8') as file:
-        #file.write(cabecalho)
+    with open('cabecalho', 'w', encoding='utf-8') as file:
         for campo in cabecalho:
             file.write(campo)
-            file.write('\n')
+            file.write(', ')
         file.close()
-'''>>>>>>>>>> Função pré-processamento dos dados <<<<<<<<<<'''
-def readCSV (cabecalho, conteudo):
+
+'''>>>>>>>>>> Função que insere o documento no MongoDB <<<<<<<<<<'''
+def insertMongo (col):
+    result = col.insert(data)
+    return result
+'''>>>>>>>>>> Fim da função que insere o documentos no MongoDB <<<<<<<<<<'''
+def readCSV (cabecalho, conteudo, col):
     with open('base.csv', 'r', encoding='utf8') as file:
         dados = csv.reader(file, delimiter=',')
         # Leituras das linhas e colunas do arquivo CSV.
@@ -119,29 +119,80 @@ def readCSV (cabecalho, conteudo):
                 if flag:
                     conteudo.insert(j, row)
                     if j == 28:
-                        createDocument()
-                        insertMongo()
+                        createDocument(cabecalho, conteudo)
+                        insertMongo(col)
                         conteudo.clear()
                 else:
                     cabecalho.insert(j, row)
                     if row == "VEHICLE TYPE CODE 5":
+                        writeDocument(cabecalho)
                         flag = True
-                # Após ler todos os dados grava no arquivo e insere no banco.      
-            if flag:
-                break
-        file.close()
-'''-------------- Acaba aqui as funções de pré-processamento. ----------------'''
-def dropDatabase ():
-    print("Coleção: x será excluido")
-    x = cillisions.drop()
-
-#create collection and create database, ao criar a coleção o base de dados se não existir será criada;
-def createCollection ():
-    #http://api.mongodb.com/python/current/api/pymongo/collection.html
+'''>>>>>>>>>> Acaba aqui as funções de pré-processamento. <<<<<<<<<'''
+'''>>>>>>>>>> Função de criação de coleções de documentos <<<<<<<<<<'''
+def creatCollection(col):
+    database.create_collection(colecao)
+    print("  [ COLLECTION:",colecao," CRIADA ]")
+    col = database[colecao]
+    print("  [ CONEXÃO ESTABELECIDA ] >> [ COLLECTION:",colecao,"]")
+    time.sleep(2)
+'''>>>>>>>>>> Fim da função de criação de coleções de documentos <<<<<<<<<<'''
+'''>>>>>>>>>> Função de criação de coleções de documentos <<<<<<<<<<'''
+def realizaDrop():
+    print("  [ DESEJA REALIZAR DROP EM ( 1 - DATABASE ) OU ( 2 - COLECTIONS )? ]")
+    op = int(input("  [ DIGITE OPÇÃO DESEJADA ] >> "))
+    if op == 1:
+        cliente.drop_database(database)
+        print("  [ DAATABASE:",database," EXCLUIDA COM SUCESSO! ]")
+    elif op == 2:
+        database.drop_collection(colecao)
+        print("  [ COLLECTION:",colecao," EXCLUIDA COM SUCESSO! ]")
+    else:
+        print("  [ OPÇÃO NÃO ENCONTRADA, VOLTANDO AO MENU! ]")
+    time.sleep(3)
+'''>>>>>>>>>> Fim da função de criação de coleções de documentos <<<<<<<<<<'''
+'''>>>>>>>>>> MENU PRINCIPAL <<<<<<<<<<'''
+def menu (col):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("|============================>>>>> Script DML no MongoDB <<<<<=============================|")
+    print("  [ ESCOLHA UMA DAS OPÇÕES ABAIXO ]")
+    print("  [ PARA CRIAR UMA NOVA COLLECTION >> 1 ]")
+    print("  [ PARA EXCLUIR UMA DATABASE >> 2 ]")
+    print("  [ PARA SAIR DO SCRIPT DIGITE >> 3 ]")
+    res = int(input("  [ DIGITE A OPÇÃO DESEJADA ] >> "))
+    if res == 1:
+        creatCollection(col)
+    elif res == 2:
+        realizaDrop()
+    elif res == 3:
+        return False
+    return True
+'''>>>>>>>>>> FIM MENU PRINCIPAL <<<<<<<<<<'''
 
 if __name__ == "__main__":
-    #parameters = input("Insira a ação DDL: ")
+    retorno = True
+    cabecalho = []
+    conteudo = []
 
-    print("O arquivo 'CSV' estar sendo carregado, por favor agarde alguns minutos...")
-    print("AUARDE ALGUNS MINUTOS...")
-    readCSV(cabecalho, conteudo)
+    if colecao:
+        col = database[colecao]
+        print("  [ CONEXÃO ESTABELECIDA ] >> [ COLLECTION:",colecao,"]")
+    else:
+        print("  [ CONEXÃO NÃO ESTABELECIDA, O NOME DA COLLECTION É NECESSÁRIA ]")
+        colecao = input("  [ DIGITE O NOME DA COLLECTION A SER CRIADA OU JÁ EXISTENTE ] >> ")
+        print("  [ O NOME DIGITADO É PARA ( 1 - UMA NOVA COLLECTION ) OU UMA ( 2 - EXISTENTE )? ]")
+        p = int(input("  [ DIGITE O VALOR ] >> "))
+        if p == 1:
+            creatCollection(col)
+        if p == 2:
+            col = database[colecao]
+            print("  [ CONEXÃO ESTABELECIDA ] >> [ COLLECTION:",colecao,"]")
+              
+    resp = input("  [ DESEJA CARREGAR A BASE DE DADOS DO ARQUIVO 'base.csv'? (yes ou no) ] >> ")
+    if resp == 'yes':
+        readCSV(cabecalho, conteudo, col)
+        print("  [ CSV LIDO E INSERÇÕES REALIZADAS ]")
+    time.sleep(2)
+    while retorno:
+        retorno = menu(col)
+    print("|==========================>>>>> ATÉ MAIS, TENHA UM BOM DIA <<<<<===========================|")
+    cliente.close()
