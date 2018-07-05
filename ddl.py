@@ -157,13 +157,14 @@ def menu (col):
     print("  [ ESCOLHA UMA DAS OPÇÕES ABAIXO ]")
     print("  [ PARA CRIAR UMA NOVA COLLECTION >> 1 ]")
     print("  [ PARA EXCLUIR UMA DATABASE >> 2 ]")
-    print("  [ PARA SAIR DO SCRIPT DIGITE >> 3 ]")
+    print("  [ PARA ATUALIZAR DOCUMENTO(S) >> 3 ]")
+    print("  [ PARA SAIR DO SCRIPT DIGITE >> 4 ]")
     res = int(input("  [ DIGITE A OPÇÃO DESEJADA ] >> "))
     if res == 1:
         creatCollection(col)
     elif res == 2:
         realizaDrop()
-    elif res == 3:
+    elif res == 4:
         return False
     return True
 '''>>>>>>>>>> FIM MENU PRINCIPAL <<<<<<<<<<'''

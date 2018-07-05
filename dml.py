@@ -8,8 +8,7 @@ import json
 import time
 from pymongo import MongoClient
 from pprint import pprint
-#from pymongo import Connection
-#from pymongo import ConnectionFailure
+# https://docs.mongodb.com/manual/tutorial/query-documents/ [comparação com sql]
 
 ''' DML, Data Manipulation Language, ou Linguagem de Manipulação de Dados. interage
 diretamente com os dados dentro das tabelas. São comandos do DML o INSERT, UPDATE e
